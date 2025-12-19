@@ -1,10 +1,12 @@
 # 使用輕量級的 Nginx Alpine 映像
-FROM nginx:alpine3.18-perl
+FROM nginx:alpine
 
 # 維護者資訊
 LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REPO"
 LABEL org.opencontainers.image.description="井字遊戲 - 靜態網頁應用"
 LABEL org.opencontainers.image.licenses="MIT"
+
+RUN apk update && apk add --no-cache libxml2
 
 # 移除預設的 Nginx 網頁
 RUN rm -rf /usr/share/nginx/html/*
