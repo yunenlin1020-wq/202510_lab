@@ -388,6 +388,10 @@ jobs:
 
       - name: 設定 Pages
         uses: actions/configure-pages@v4
+        with:
+          # 提供 GITHUB_TOKEN 並嘗試啟用 Pages 的 GitHub Actions 建置來源（若尚未啟用）
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          enablement: github-actions
 
       - name: 上傳 artifact
         uses: actions/upload-pages-artifact@v3

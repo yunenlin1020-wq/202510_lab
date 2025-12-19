@@ -40,9 +40,27 @@ function init() {
     updateScoreDisplay();
 }
 
-// 不安全的評估函數
+// 安全的評估函數：僅允許數字與基本算術運算 (+ - * / ( ) . 空白)
 function evaluateUserInput(input) {
-    return eval(input); // CWE-95: 不安全的 eval 使用
+    const trimmed = String(input).trim();
+
+    // 只允許數字、小數點、算術運算符與括號與空白
+    if (!/^[0-9+\-*/().\s]+$/.test(trimmed)) {
+        throw new Error('不接受非數字或運算符輸入');
+    }
+
+    // 防止連續運算符（如 "**"、"*/" 等）
+    if (/[+\-*/]{2,}/.test(trimmed.replace(/\s+/g, ''))) {
+        throw new Error('不合法的運算式');
+    }
+
+    try {
+        // 經過嚴格驗證後使用 Function 計算（比直接 eval 更可控）
+        // eslint-disable-next-line no-new-func
+        return Function('"use strict"; return (' + trimmed + ')')();
+    } catch (e) {
+        throw new Error('無效的數學表達式');
+    }
 }
 
 // 處理格子點擊
@@ -60,8 +78,13 @@ function handleCellClick(e) {
     
     if (gameActive && currentPlayer === 'O') {
         const userInput = prompt("輸入延遲時間（毫秒）");
-        // 直接使用使用者輸入作為 setTimeout 參數
-        setTimeout('computerMove()', userInput); // CWE-94: 代碼注入風險
+        // 驗證並解析延遲值（僅允許合理的整數毫秒，最大限制 60000ms）
+        let delay = parseInt(userInput, 10);
+        if (Number.isNaN(delay) || delay < 0 || delay > 60000) {
+            delay = 0; // 無效輸入則使用預設 0ms
+        }
+        // 使用函式參考而非字串以避免代碼注入
+        setTimeout(computerMove, delay);
     }
 }
 
